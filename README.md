@@ -27,7 +27,6 @@ A small web interface is included to test different bug reports easily.
 - ScaleDown API  
 - HTML/CSS  
 
----
 
 ## How to Run the Project
 
