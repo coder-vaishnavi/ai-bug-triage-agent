@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bug Triage Agent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in-out;
+            height: 70%;
+            margin-top: 40px;
+
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #0d0c0c;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 1.2em;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.loading {
+            pointer-events: none;
+        }
+
+        button.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            background: #f8f9fa;
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: 12px;
+            border-left: 6px solid #667eea;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 2em;
+            }
+            textarea, input[type="text"] {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-bug"></i> AI Bug Triage Agent</h2>
+        <form id="bugForm" method="post">
+            <div class="form-group">
+                <label for="title">Bug Title</label>
+                <div class="input-group">
+                    <i class="fas fa-tag"></i>
+                    <input type="text" id="title" name="title" required placeholder="Enter a concise bug title">
+                </div>
+                <div class="error" id="titleError">Bug title is required.</div>
+            </div>
+            <div class="form-group">
+                <label for="history">Issue History</label>
+                <div class="input-group">
+                    <i class="fas fa-history"></i>
+                    <textarea id="history" name="history" rows="5" placeholder="Describe the issue history, steps to reproduce, etc."></textarea>
+                </div>
+                <div class="error" id="historyError">Issue history is required.</div>
+            </div>
+            <div class="form-group">
+                <label for="code">Code Context</label>
+                <div class="input-group">
+                    <i class="fas fa-code"></i>
+                    <textarea id="code" name="code" rows="6" placeholder="Paste relevant code snippets or context"></textarea>
+                </div>
+                <div class="error" id="codeError">Code context is required.</div>
+            </div>
+            <button type="submit" id="submitBtn"><i class="fas fa-search"></i> Analyze Bug</button>
+        </form>
+        {% if result %}
+        <div class="result">
+            <h3><i class="fas fa-robot"></i> AI Analysis Result</h3>
+            <pre>{{ result }}</pre>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('bugForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const titleInput = document.getElementById('title');
+            const historyTextarea = document.getElementById('history');
+            const codeTextarea = document.getElementById('code');
+            const titleError = document.getElementById('titleError');
+            const historyError = document.getElementById('historyError');
+            const codeError = document.getElementById('codeError');
+
+            // Auto-resize textareas
+            function autoResizeTextarea(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+
+            historyTextarea.addEventListener('input', () => autoResizeTextarea(historyTextarea));
+            codeTextarea.addEventListener('input', () => autoResizeTextarea(codeTextarea));
+
+            // Form validation
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+
+                // Reset errors
+                titleError.style.display = 'none';
+                historyError.style.display = 'none';
+                codeError.style.display = 'none';
+
+                // Check title
+                if (!titleInput.value.trim()) {
+                    titleError.style.display = 'block';
+                    isValid = false;
+                }
+
+                // Check history
+                if (!historyTextarea.value.trim()) {
+                    historyError.style.display = 'block';
+                    isValid = false;
+                }
+
+                // Check code
+                if (!codeTextarea.value.trim()) {
+                    codeError.style.display = 'block';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Analyzing...';
+                submitBtn.disabled = true;
+            });
+
+            // Remove loading state if form submission fails (e.g., on page reload)
+            window.addEventListener('load', function() {
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Bug';
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
