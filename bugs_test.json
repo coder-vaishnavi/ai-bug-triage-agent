@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Login crash on submit",
+    "history": "User clicks login and the application crashes. Error appears in authentication module. Multiple users affected.",
+    "code": "function loginUser(){ auth.refreshToken(); }"
+  },
+  {
+    "title": "Payment gateway timeout",
+    "history": "Users cannot complete payments. Transaction fails after clicking pay button. API timeout error.",
+    "code": "function processPayment(){ paymentAPI.chargeCard(); }"
+  },
+  {
+    "title": "Profile page loading slow",
+    "history": "Profile page takes 8-10 seconds to load. Happens for many users but no crash.",
+    "code": "SELECT * FROM users WHERE id=?"
+  },
+  {
+    "title": "UI button misalignment",
+    "history": "Login button is not centered on mobile devices. UI looks broken but functionality works.",
+    "code": "<button class='login-btn'></button>"
+  },
+  {
+    "title": "Image upload crash",
+    "history": "Uploading profile image crashes the app. File handler throws error.",
+    "code": "uploadImage(file){ file.read(); }"
+  },
+  {
+    "title": "Search not returning results",
+    "history": "Search feature returns empty results even when data exists. Backend query issue suspected.",
+    "code": "function search(){ db.find(query); }"
+  }
+]
