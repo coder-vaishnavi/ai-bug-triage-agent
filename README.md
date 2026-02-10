@@ -96,5 +96,3 @@ Assigned Team: Auth Team
 
 Built as part of an AI agent assignment to demonstrate automated bug triage using LLM-based tools.
 
-```
-```
